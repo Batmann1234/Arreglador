@@ -29,6 +29,12 @@ public final class ArreglarPlugin extends JavaPlugin {
         p.sendMessage(MiniMessage.miniMessage().deserialize(raw("prefix") + raw(key)));
     }
 
+    public void sendError(Player p, String code) {
+        String msg = raw("error");
+        msg = msg.contains("<codigo>") ? msg.replace("<codigo>", code) : msg + " (" + code + ")";
+        p.sendMessage(MiniMessage.miniMessage().deserialize(raw("prefix") + msg));
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {

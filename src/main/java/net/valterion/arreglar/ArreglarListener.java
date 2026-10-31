@@ -25,6 +25,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 public final class ArreglarListener implements Listener {
@@ -120,8 +121,7 @@ public final class ArreglarListener implements Listener {
                 return;
             }
             if (!SAFE.matcher(target).matches()) {
-                warn(p, "ID nuevo inválido en config para " + type + ": " + target);
-                plugin.send(p, "error");
+                fail(p, "E1", "ID nuevo inválido en config para " + type + ": " + target);
                 return;
             }
 
@@ -130,9 +130,8 @@ public final class ArreglarListener implements Listener {
             ItemStack freshSelf = safeItem(mythic, type);
             Map<String, Integer> rawBase = empty(freshSelf) ? null : AEBridge.enchants(freshSelf);
             if (raw == null || rawBase == null) {
-                warn(p, raw == null ? "no se pudieron leer los encantamientos del ítem"
+                fail(p, "E2", raw == null ? "no se pudieron leer los encantamientos del ítem"
                         : "MythicMobs no devolvió el ítem base de " + type + " o falló la lectura de AE");
-                plugin.send(p, "error");
                 return;
             }
             Map<String, Integer> onItem = lower(raw);
@@ -158,16 +157,14 @@ public final class ArreglarListener implements Listener {
 
             // 4) El ítem nuevo tiene que existir ANTES de consumir nada
             if (empty(safeItem(mythic, target))) {
-                warn(p, "el ítem nuevo no existe o no se pudo crear en MythicMobs: " + target);
-                plugin.send(p, "error");
+                fail(p, "E3", "el ítem nuevo no existe o no se pudo crear en MythicMobs: " + target);
                 return;
             }
 
             // 5) Consumir primero, entregar después (síncrono). El hueco liberado garantiza espacio.
             ItemStack cur = inv.getItem(slot);
-            if (empty(cur) || !cur.isSimilar(item) || cur.getAmount() != 1) {
-                warn(p, "el ítem cambió de lugar durante el proceso");
-                plugin.send(p, "error");
+            if (empty(cur) || cur.getAmount() != 1) {
+                fail(p, "E4", "el slot " + slot + " ya no tiene el ítem");
                 return;
             }
             inv.setItem(slot, null);
@@ -180,22 +177,26 @@ public final class ArreglarListener implements Listener {
                         .replace("<jugador>", p.getName()).replace("<item>", target);
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
             } catch (Exception ex) {
-                plugin.getLogger().severe("FALLO ENTREGANDO -> " + audit + " : " + ex.getMessage());
+                plugin.getLogger().severe("FALLO ENTREGANDO -> " + audit + " : " + ex);
                 log("FALLO " + audit);
-                plugin.send(p, "error");
+                plugin.sendError(p, "E5");
                 return;
             }
 
             p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_USE, 1f, 1.2f);
             plugin.send(p, "listo");
+        } catch (Exception ex) {
+            plugin.getLogger().log(Level.SEVERE, "Error inesperado procesando a " + p.getName(), ex);
+            plugin.sendError(p, "E9");
         } finally {
             busy.remove(id);
             Bukkit.getScheduler().runTask(plugin, p::updateInventory);
         }
     }
 
-    private void warn(Player p, String why) {
-        plugin.getLogger().warning("[" + p.getName() + "] " + why);
+    private void fail(Player p, String code, String why) {
+        plugin.getLogger().warning("[" + p.getName() + "] " + code + ": " + why);
+        plugin.sendError(p, code);
     }
 
     private static ItemStack safeItem(MythicBukkit mythic, String id) {

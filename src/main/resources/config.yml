@@ -56,4 +56,4 @@ mensajes:
   tiene-runas: "<#52FF7A>Tu ítem tiene runas. Sácalas en el rompedor: recibirás tu ítem actualizado y tus runas."
   cooldown: "<red>Espera un momento."
   listo: "<#52FF7A>Ítem arreglado: recibiste su versión nueva."
-  error: "<red>Ocurrió un error. Avisa a un administrador."
+  error: "<red>Ocurrió un error. Avisa a un administrador. <dark_gray>(<codigo>)"

@@ -3,6 +3,7 @@ package net.valterion.arreglar;
 import org.bukkit.inventory.ItemStack;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -10,11 +11,13 @@ import java.util.logging.Logger;
 final class AEBridge {
 
     private static Method method;
+    private static Logger log;
 
     private AEBridge() {
     }
 
-    static boolean init(Logger log) {
+    static boolean init(Logger logger) {
+        log = logger;
         try {
             Class<?> c = Class.forName("net.advancedplugins.ae.api.AEAPI");
             method = c.getMethod("getEnchantmentsOnItem", ItemStack.class);
@@ -25,12 +28,19 @@ final class AEBridge {
         }
     }
 
-    /** Devuelve null si falla; quien llama debe abortar sin consumir el ítem. */
+    /**
+     * Mapa vacío si el ítem no tiene encantamientos (AE puede devolver null en ese caso).
+     * Devuelve null SOLO si la llamada falló; quien llama debe abortar sin consumir el ítem.
+     */
     @SuppressWarnings("unchecked")
     static Map<String, Integer> enchants(ItemStack item) {
         try {
-            return (Map<String, Integer>) method.invoke(null, item);
+            Object r = method.invoke(null, item);
+            if (r == null) return new HashMap<>();
+            return (Map<String, Integer>) r;
         } catch (Throwable t) {
+            Throwable c = t.getCause() != null ? t.getCause() : t;
+            log.warning("Fallo leyendo los encantamientos de AE: " + c);
             return null;
         }
     }

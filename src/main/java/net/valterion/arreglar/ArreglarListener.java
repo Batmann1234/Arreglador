@@ -120,7 +120,7 @@ public final class ArreglarListener implements Listener {
                 return;
             }
             if (!SAFE.matcher(target).matches()) {
-                plugin.getLogger().severe("ID nuevo inválido en config para " + type + ": " + target);
+                warn(p, "ID nuevo inválido en config para " + type + ": " + target);
                 plugin.send(p, "error");
                 return;
             }
@@ -130,6 +130,8 @@ public final class ArreglarListener implements Listener {
             ItemStack freshSelf = safeItem(mythic, type);
             Map<String, Integer> rawBase = empty(freshSelf) ? null : AEBridge.enchants(freshSelf);
             if (raw == null || rawBase == null) {
+                warn(p, raw == null ? "no se pudieron leer los encantamientos del ítem"
+                        : "MythicMobs no devolvió el ítem base de " + type + " o falló la lectura de AE");
                 plugin.send(p, "error");
                 return;
             }
@@ -156,13 +158,15 @@ public final class ArreglarListener implements Listener {
 
             // 4) El ítem nuevo tiene que existir ANTES de consumir nada
             if (empty(safeItem(mythic, target))) {
-                plugin.getLogger().severe("El ítem nuevo no existe en MythicMobs: " + target);
+                warn(p, "el ítem nuevo no existe o no se pudo crear en MythicMobs: " + target);
                 plugin.send(p, "error");
                 return;
             }
 
             // 5) Consumir primero, entregar después (síncrono). El hueco liberado garantiza espacio.
-            if (inv.getItem(slot) != item) {
+            ItemStack cur = inv.getItem(slot);
+            if (empty(cur) || !cur.isSimilar(item) || cur.getAmount() != 1) {
+                warn(p, "el ítem cambió de lugar durante el proceso");
                 plugin.send(p, "error");
                 return;
             }
@@ -188,6 +192,10 @@ public final class ArreglarListener implements Listener {
             busy.remove(id);
             Bukkit.getScheduler().runTask(plugin, p::updateInventory);
         }
+    }
+
+    private void warn(Player p, String why) {
+        plugin.getLogger().warning("[" + p.getName() + "] " + why);
     }
 
     private static ItemStack safeItem(MythicBukkit mythic, String id) {

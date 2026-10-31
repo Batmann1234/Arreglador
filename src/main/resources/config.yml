@@ -1,0 +1,59 @@
+menu:
+  titulo: "<gradient:#00FF3B:#52FF7A>Arreglar Ítems</gradient>"
+  filas: 3
+  relleno: BLACK_STAINED_GLASS_PANE
+  info:
+    slot: 13
+    material: ANVIL
+    nombre: "<#52FF7A>Cómo arreglar tu ítem"
+    lore:
+      - "<white>Haz <#52FF7A>shift + click derecho <white>a tu ítem"
+      - "<white>en tu inventario para cambiarlo por"
+      - "<white>su versión nueva."
+      - ""
+      - "<red>Si tiene runas, se abrirá el rompedor"
+      - "<red>para sacárselas primero."
+
+comandos:
+  # Placeholders: <jugador> <item>
+  item-nuevo: "mm i give -s <jugador> <item>"
+  # Comando (sin /) que se ejecuta como el jugador cuando su ítem tiene runas
+  rompedor: "rompedor"
+
+# Solo estos ítems se pueden arreglar.
+# Formato:  ID_del_ítem_que_entrega_el_jugador: "ID_del_ítem_nuevo_que_recibe"
+# Si el ID nuevo es el mismo, recibe la versión actual de ese mismo ítem.
+items:
+  GuadañaDeVerdugo1: "GuadañaDeVerdugo1"
+  GuadañaDeVerdugo2: "GuadañaDeVerdugo2"
+  GuadañaDeVerdugo3: "GuadañaDeVerdugo3"
+  ArcoDeElfo: "ArcoDeElfo"
+  ArcoDeElfo2: "ArcoDeElfo2"
+  ArcoDeElfo3: "ArcoDeElfo3"
+  DagaDelAsesino1: "DagaDelAsesino1"
+  DagaDelAsesino2: "DagaDelAsesino2"
+  DagaDelAsesino3: "DagaDelAsesino3"
+  EspadaBerserker1: "EspadaBerserker1"
+  EspadaBerserker2: "EspadaBerserker2"
+  EspadaBerserker3: "EspadaBerserker3"
+  EspadaDelCaballero1: "EspadaDelCaballero1"
+  EspadaDelCaballero2: "EspadaDelCaballero2"
+  EspadaDelCaballero3: "EspadaDelCaballero3"
+  EspadaSaltarina: "EspadaSaltarina"
+  EspadaSaltarina2: "EspadaSaltarina2"
+  EspadaSaltarina3: "EspadaSaltarina3"
+
+cooldown-ms: 500
+
+mensajes:
+  prefix: "<#00FF3B>ARREGLO <white>» "
+  sin-permiso: "<red>No tienes permiso."
+  solo-jugadores: "<red>Solo jugadores."
+  recargado: "<#52FF7A>Configuración recargada."
+  cantidad: "<red>Solo puedes arreglar un ítem a la vez."
+  no-mythic: "<red>Ese ítem no se puede arreglar."
+  no-permitido: "<red>Ese ítem no está disponible para arreglar."
+  tiene-runas: "<#52FF7A>Tu ítem tiene runas. Sácalas en el rompedor: recibirás tu ítem actualizado y tus runas."
+  cooldown: "<red>Espera un momento."
+  listo: "<#52FF7A>Ítem arreglado: recibiste su versión nueva."
+  error: "<red>Ocurrió un error. Avisa a un administrador."

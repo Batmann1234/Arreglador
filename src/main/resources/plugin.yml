@@ -1,13 +1,20 @@
 name: ArreglarItems
 main: net.valterion.arreglar.ArreglarPlugin
-version: 1.0.0
+version: 1.1.0
 api-version: '1.21'
 depend: [MythicMobs, AdvancedEnchantments]
 commands:
   arreglar:
     description: Abre el menú para arreglar ítems sin runas
+  rompedor:
+    description: Abre el rompedor de encantamientos
+    aliases: [romper]
 permissions:
   arreglar.usar:
     default: op
   arreglar.admin:
+    default: op
+  rompedor.usar:
+    default: op
+  rompedor.admin:
     default: op

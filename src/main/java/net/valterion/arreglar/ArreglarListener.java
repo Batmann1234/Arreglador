@@ -85,14 +85,14 @@ public final class ArreglarListener implements Listener {
         if (!busy.add(id)) return;
         try {
             long now = System.currentTimeMillis();
-            long cd = plugin.getConfig().getLong("cooldown-ms", 500);
+            long cd = plugin.getConfig().getLong("arreglar.cooldown-ms", 100);
             Long prev = last.get(id);
             if (prev != null && now - prev < cd) {
-                plugin.send(p, "cooldown");
+                plugin.send(p, ArreglarPlugin.ARREGLAR, "cooldown");
                 return;
             }
             if (item.getAmount() != 1) {
-                plugin.send(p, "cantidad");
+                plugin.send(p, ArreglarPlugin.ARREGLAR, "cantidad");
                 return;
             }
 
@@ -100,13 +100,13 @@ public final class ArreglarListener implements Listener {
             MythicBukkit mythic = MythicBukkit.inst();
             String type = mythic.getItemManager().getMythicTypeFromItem(item);
             if (type == null || !SAFE.matcher(type).matches()) {
-                plugin.send(p, "no-mythic");
+                plugin.send(p, ArreglarPlugin.ARREGLAR, "no-mythic");
                 return;
             }
 
             // 2) Solo IDs de la lista
             String target = null;
-            ConfigurationSection sec = plugin.getConfig().getConfigurationSection("items");
+            ConfigurationSection sec = plugin.getConfig().getConfigurationSection("arreglar.items");
             if (sec != null) {
                 for (String key : sec.getKeys(false)) {
                     if (key.equalsIgnoreCase(type)) {
@@ -117,7 +117,7 @@ public final class ArreglarListener implements Listener {
                 }
             }
             if (target == null) {
-                plugin.send(p, "no-permitido");
+                plugin.send(p, ArreglarPlugin.ARREGLAR, "no-permitido");
                 return;
             }
             if (!SAFE.matcher(target).matches()) {
@@ -146,11 +146,14 @@ public final class ArreglarListener implements Listener {
             }
             if (hasRunes) {
                 // No se consume nada: se cierra este menú y se abre el rompedor.
-                plugin.send(p, "tiene-runas");
-                String cmd = plugin.getConfig().getString("comandos.rompedor", "rompedor");
+                plugin.send(p, ArreglarPlugin.ARREGLAR, "tiene-runas");
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     p.closeInventory();
-                    p.performCommand(cmd);
+                    if (!p.hasPermission("rompedor.usar")) {
+                        plugin.send(p, ArreglarPlugin.ROMPEDOR, "sin-permiso");
+                        return;
+                    }
+                    plugin.rompedorMenu().open(p);
                 });
                 return;
             }
@@ -173,21 +176,21 @@ public final class ArreglarListener implements Listener {
             String audit = "jugador=" + p.getName() + " item=" + type + " nuevo=" + target;
             log(audit);
             try {
-                String cmd = plugin.getConfig().getString("comandos.item-nuevo")
+                String cmd = plugin.getConfig().getString("arreglar.comandos.item-nuevo")
                         .replace("<jugador>", p.getName()).replace("<item>", target);
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
             } catch (Exception ex) {
                 plugin.getLogger().severe("FALLO ENTREGANDO -> " + audit + " : " + ex);
                 log("FALLO " + audit);
-                plugin.sendError(p, "E5");
+                plugin.sendError(p, ArreglarPlugin.ARREGLAR, "E5");
                 return;
             }
 
             p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_USE, 1f, 1.2f);
-            plugin.send(p, "listo");
+            plugin.send(p, ArreglarPlugin.ARREGLAR, "listo");
         } catch (Exception ex) {
             plugin.getLogger().log(Level.SEVERE, "Error inesperado procesando a " + p.getName(), ex);
-            plugin.sendError(p, "E9");
+            plugin.sendError(p, ArreglarPlugin.ARREGLAR, "E9");
         } finally {
             busy.remove(id);
             Bukkit.getScheduler().runTask(plugin, p::updateInventory);
@@ -196,7 +199,7 @@ public final class ArreglarListener implements Listener {
 
     private void fail(Player p, String code, String why) {
         plugin.getLogger().warning("[" + p.getName() + "] " + code + ": " + why);
-        plugin.sendError(p, code);
+        plugin.sendError(p, ArreglarPlugin.ARREGLAR, code);
     }
 
     private static ItemStack safeItem(MythicBukkit mythic, String id) {

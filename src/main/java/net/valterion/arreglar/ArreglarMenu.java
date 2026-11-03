@@ -33,13 +33,14 @@ public final class ArreglarMenu {
     }
 
     public void open(Player p) {
-        int rows = Math.max(1, Math.min(6, plugin.getConfig().getInt("menu.filas", 3)));
+        String base = "arreglar.menu.";
+        int rows = Math.max(1, Math.min(6, plugin.getConfig().getInt(base + "filas", 3)));
         Holder holder = new Holder();
         Inventory inv = Bukkit.createInventory(holder, rows * 9,
-                mm.deserialize(plugin.getConfig().getString("menu.titulo", "Arreglar")));
+                mm.deserialize(plugin.getConfig().getString(base + "titulo", "Arreglar")));
         holder.inventory = inv;
 
-        Material fill = Material.matchMaterial(plugin.getConfig().getString("menu.relleno", "BLACK_STAINED_GLASS_PANE"));
+        Material fill = Material.matchMaterial(plugin.getConfig().getString(base + "relleno", "BLACK_STAINED_GLASS_PANE"));
         if (fill == null) fill = Material.BLACK_STAINED_GLASS_PANE;
         ItemStack filler = new ItemStack(fill);
         ItemMeta fm = filler.getItemMeta();
@@ -47,15 +48,15 @@ public final class ArreglarMenu {
         filler.setItemMeta(fm);
         for (int i = 0; i < inv.getSize(); i++) inv.setItem(i, filler);
 
-        int infoSlot = plugin.getConfig().getInt("menu.info.slot", 13);
+        int infoSlot = plugin.getConfig().getInt(base + "info.slot", 13);
         if (infoSlot >= 0 && infoSlot < inv.getSize()) {
-            Material im = Material.matchMaterial(plugin.getConfig().getString("menu.info.material", "ANVIL"));
+            Material im = Material.matchMaterial(plugin.getConfig().getString(base + "info.material", "ANVIL"));
             if (im == null) im = Material.ANVIL;
             ItemStack info = new ItemStack(im);
             ItemMeta meta = info.getItemMeta();
-            meta.displayName(mm.deserialize(plugin.getConfig().getString("menu.info.nombre", "")));
+            meta.displayName(mm.deserialize(plugin.getConfig().getString(base + "info.nombre", "")));
             List<Component> lore = new ArrayList<>();
-            for (String l : plugin.getConfig().getStringList("menu.info.lore")) lore.add(mm.deserialize(l));
+            for (String l : plugin.getConfig().getStringList(base + "info.lore")) lore.add(mm.deserialize(l));
             meta.lore(lore);
             info.setItemMeta(meta);
             inv.setItem(infoSlot, info);

@@ -76,15 +76,13 @@ rompedor:
     # Placeholders: <jugador> <item>
     item-limpio: "mm i give -s <jugador> <item>"
     # Placeholders: <jugador> <encantamiento> <nivel>
-    runa: "ae givebook <jugador> <encantamiento> <nivel> 1 100 0"
+    runa: "ae givebook <jugador> <encantamiento> <nivel> 1 70 0"
 
   # Vacío = cualquier ítem de MythicMobs. Con IDs, solo esos se pueden romper.
   items-permitidos:
     - "GuadañaDeVerdugo1"
     - "GuadañaDeVerdugo2"
     - "GuadañaDeVerdugo3"
-    - "ArcoDeElfo"
-    - "ArcoDeElfo2"
     - "ArcoDeElfo3"
     - "DagaDelAsesino1"
     - "DagaDelAsesino2"

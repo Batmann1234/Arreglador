@@ -6,6 +6,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+
 /**
  * Plugin único con dos menús:
  *  - /arreglar : cambia un ítem sin runas por su versión nueva.
@@ -22,6 +26,7 @@ public final class ArreglarPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
+        checkConfigFormat();
         if (!AEBridge.init(getLogger())) {
             getServer().getPluginManager().disablePlugin(this);
             return;
@@ -32,13 +37,38 @@ public final class ArreglarPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new RompedorListener(this, rompedorMenu), this);
     }
 
+    /**
+     * Si el config.yml de la carpeta del plugin está en el formato viejo (o incompleto),
+     * lo guarda como config-viejo.yml y deja el config nuevo de fábrica.
+     */
+    private void checkConfigFormat() {
+        if (getConfig().contains("arreglar.items", true)
+                && getConfig().contains("rompedor.menu", true)
+                && getConfig().contains("mensajes.arreglar.prefix", true)
+                && getConfig().contains("mensajes.rompedor.prefix", true)) {
+            return;
+        }
+        try {
+            File f = new File(getDataFolder(), "config.yml");
+            File bak = new File(getDataFolder(), "config-viejo.yml");
+            Files.copy(f.toPath(), bak.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            saveResource("config.yml", true);
+            reloadConfig();
+            getLogger().warning("El config.yml tenía el formato viejo. Se guardó como config-viejo.yml "
+                    + "y se creó el config nuevo (arreglar / rompedor / mensajes).");
+        } catch (Exception ex) {
+            getLogger().severe("config.yml con formato viejo y no se pudo reemplazar: " + ex);
+        }
+    }
+
     public RompedorMenu rompedorMenu() {
         return rompedorMenu;
     }
 
     /** Lee mensajes.<sección>.<clave>. */
     public String raw(String section, String key) {
-        return getConfig().getString("mensajes." + section + "." + key, key);
+        String v = getConfig().getString("mensajes." + section + "." + key); // con defaults del jar
+        return v != null ? v : key;
     }
 
     private void deliver(CommandSender to, String section, String text) {
@@ -69,6 +99,7 @@ public final class ArreglarPlugin extends JavaPlugin {
                 return true;
             }
             reloadConfig(); // recarga la config completa (los dos menús)
+            checkConfigFormat();
             send(sender, section, "recargado");
             return true;
         }
